@@ -3,6 +3,8 @@
 use app\models\User;
 use app\repositories\PartRepository;
 use app\repositories\PartRepositoryInterface;
+use app\services\ai\AiRecommendationService;
+use GuzzleHttp\Client;
 use sizeg\jwt\Jwt;
 use yii\caching\FileCache;
 use yii\gii\Module;
@@ -36,6 +38,12 @@ $config = [
                 'useFileTransport' => true,
                 'viewPath' => '@app/mail',
             ],
+            AiRecommendationService::class => function () {
+                return new AiRecommendationService(
+                    new Client(['timeout' => 10.0]),
+                    getenv('OPENAI_API_KEY') ?: '' // Pobieramy klucz ze zmiennych środowiskowych
+                );
+            },
         ],
     ],
     'aliases' => [
