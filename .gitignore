@@ -1,0 +1,7 @@
+/vendor/
+/runtime/
+/web/assets/
+/.env
+/.idea
+/.vscode
+docker/db/data/
