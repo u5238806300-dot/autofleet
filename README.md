@@ -28,3 +28,17 @@ Klienci z rolą `B2B_PREMIUM` otrzymują automatyczny rabat 25%, natomiast `B2B_
 ## Endpointy
 * `GET /api/vehicles` - Zwraca listę pojazdów (paginacja)
 * `GET /api/parts?vin=<VIN>` - Zwraca listę części (z paginacją i meta tagami), opcjonalnie filtrowaną pod kątem kompatybilności z danym pojazdem.
+
+## Przetwarzanie asynchroniczne (Kolejki)
+System korzysta z `yiisoft/yii2-queue` opartym na bazie danych MySQL/MariaDB.
+Służy on do przetwarzania ciężkich operacji, takich jak importy cenników CSV.
+
+### Zlecanie importu
+Aby wrzucić plik CSV do kolejki, uruchom:
+`docker-compose exec php php yii import/csv /var/www/html/data/import_test.csv`
+
+### Uruchamianie Workera
+Aby przetworzyć zadania czekające w kolejce (w środowisku deweloperskim), użyj:
+`docker-compose exec php php yii queue/run`
+
+*Uwaga: Na środowisku produkcyjnym worker powinien być zarządzany przez np. Supervisor (komenda `php yii queue/listen`).*
