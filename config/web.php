@@ -74,6 +74,9 @@ $config = [
                 // Ręczny routing dla health-checka
                 'GET api/health' => 'api/health/index',
 
+                // Ręczny routing dla endpointu AI (Dodane w tym kroku)
+                'POST api/ai/suggest-parts' => 'api/ai/suggest-parts',
+
                 // Automatyczny routing RESTful dla kontrolerów
                 [
                     'class' => 'yii\rest\UrlRule',

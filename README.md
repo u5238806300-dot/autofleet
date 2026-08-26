@@ -42,3 +42,21 @@ Aby przetworzyć zadania czekające w kolejce (w środowisku deweloperskim), uż
 `docker-compose exec php php yii queue/run`
 
 *Uwaga: Na środowisku produkcyjnym worker powinien być zarządzany przez np. Supervisor (komenda `php yii queue/listen`).*
+
+## Integracja AI (Estymacja napraw)
+Platforma posiada inteligentny moduł diagnozowania usterek na podstawie kodów błędów OBD2 z wykorzystaniem LLM (OpenAI API).
+
+### Konfiguracja
+Aby moduł komunikował się z prawdziwym API, przekaż klucz środowiskowy do kontenera:
+`OPENAI_API_KEY=twój_klucz_tutaj docker-compose up -d`
+*(Jeśli klucz nie zostanie podany, system zwróci bezpieczne dane typu mock na potrzeby testów)*
+
+### Endpoint AI
+**POST** `/api/ai/suggest-parts`
+**Headers:** `Authorization: Bearer <token>`
+**Body (JSON):**
+```json
+{
+  "vin": "WVWZZZ1ZZEW000001",
+  "obd2_code": "P0300"
+}
