@@ -1,5 +1,5 @@
 parameters:
-    level: 5
+    level: 8
 
     paths:
         - assets
@@ -11,6 +11,15 @@ parameters:
         - tests/Acceptance
         - tests/Functional
         - tests/Unit
+        - modules/api/controllers
+        - services
+        - repositories
+        - jobs
+
+    excludePaths:
+        - vendor
+        - tests
+        - runtime
 
     scanDirectories:
         - tests/Support
