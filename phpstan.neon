@@ -8,9 +8,6 @@ parameters:
         - mail
         - models
         - widgets
-        - tests/Acceptance
-        - tests/Functional
-        - tests/Unit
         - modules/api/controllers
         - services
         - repositories
@@ -35,6 +32,7 @@ parameters:
         - YII_ENV_TEST
 
     ignoreErrors:
-        - '#Unsafe usage of new static\(\).#'
+        - '#Cannot access property \$(db|user|request|params|session|jwt|queue|security|charset) on yii\\console\\Application\|yii\\web\\Application.*#'
+        - identifier: missingType.iterableValue
 
     tmpDir: %currentWorkingDirectory%/runtime

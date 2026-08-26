@@ -39,8 +39,8 @@ final class CsvImportJob extends BaseObject implements JobInterface
                     continue; // Pomijamy uszkodzone wiersze
                 }
 
-                $sku = trim($row[0]);
-                $name = trim($row[1]);
+                $sku = trim((string) ($row[0] ?? ''));
+                $name = trim((string) ($row[1] ?? ''));
                 $price = (float) $row[2];
                 $stock = (int) $row[3];
 

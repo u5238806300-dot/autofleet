@@ -14,7 +14,7 @@ final class VehicleController extends ActiveController
     public $modelClass = Vehicle::class;
 
     /**
-     * @return array|array[]|\class-string[]
+     * @return array|array[]|class-string[]
      */
     public function behaviors(): array
     {

@@ -12,6 +12,7 @@ use yii\filters\auth\HttpBearerAuth;
 use yii\filters\RateLimiter;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
+use yii\web\Request;
 use Yii;
 
 final class AiController extends Controller
@@ -21,20 +22,20 @@ final class AiController extends Controller
      * @param $module
      * @param AiRecommendationService $aiService
      * @param PromptGenerator $promptGenerator
-     * @param $config
+     * @param array $config
      */
     public function __construct(
         $id,
         $module,
         private readonly AiRecommendationService $aiService,
         private readonly PromptGenerator $promptGenerator,
-        $config = []
+        array $config = []
     ) {
         parent::__construct($id, $module, $config);
     }
 
     /**
-     * @return \class-string[][]
+     * @return array<string, array<string, class-string>>
      */
     public function behaviors(): array
     {
@@ -46,14 +47,20 @@ final class AiController extends Controller
 
     /**
      * Endpoint: POST /api/ai/suggest-parts
+     * @return array<string, mixed>
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
      */
     public function actionSuggestParts(): array
     {
-        $request = Yii::$app->request;
-        $obd2Code = $request->post('obd2_code');
-        $vin = $request->post('vin');
+        /** @var Request $request */
+        $request = $this->request;
 
-        if (!$obd2Code || !$vin) {
+        // Bezpośrednie wywołanie, rzutowanie na string dla pełnego bezpieczeństwa typu
+        $obd2Code = (string) $request->post('obd2_code', '');
+        $vin = (string) $request->post('vin', '');
+
+        if ($obd2Code === '' || $vin === '') {
             throw new BadRequestHttpException('Parametry "obd2_code" i "vin" są wymagane.');
         }
 

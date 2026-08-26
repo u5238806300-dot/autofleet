@@ -17,6 +17,8 @@ use yii\web\IdentityInterface;
  * @property string $password_hash
  * @property string|null $access_token
  * @property string $role
+ * @property int $allowance
+ * @property int $allowance_updated_at
  * @property int $created_at
  * @property int $updated_at
  */
@@ -49,7 +51,7 @@ class User extends ActiveRecord implements IdentityInterface, RateLimitInterface
             [['access_token'], 'default', 'value' => null],
             [['role'], 'default', 'value' => 'b2b_client'],
             [['username', 'auth_key', 'password_hash'], 'required'],
-            [['created_at', 'updated_at'], 'integer'],
+            [['created_at', 'updated_at', 'allowance', 'allowance_updated_at'], 'integer'],
             [['username', 'password_hash', 'access_token'], 'string', 'max' => 255],
             [['auth_key', 'role'], 'string', 'max' => 32],
             [['username'], 'unique'],
@@ -69,13 +71,15 @@ class User extends ActiveRecord implements IdentityInterface, RateLimitInterface
             'password_hash' => 'Password Hash',
             'access_token' => 'Access Token',
             'role' => 'Role',
+            'allowance' => 'Allowance',
+            'allowance_updated_at' => 'Allowance Updated At',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
     }
 
     /**
-     * @param $id
+     * @param int|string $id
      * @return IdentityInterface|null
      */
     public static function findIdentity($id): ?IdentityInterface
@@ -84,7 +88,18 @@ class User extends ActiveRecord implements IdentityInterface, RateLimitInterface
     }
 
     /**
-     * @param $token
+     * Finds user by username
+     *
+     * @param string $username
+     * @return static|null
+     */
+    public static function findByUsername(string $username): ?static
+    {
+        return static::findOne(['username' => $username]);
+    }
+
+    /**
+     * @param mixed $token
      * @param null $type
      * @return IdentityInterface|null
      */
@@ -93,11 +108,11 @@ class User extends ActiveRecord implements IdentityInterface, RateLimitInterface
         /** @var \sizeg\jwt\Jwt $jwt */
         $jwt = \Yii::$app->jwt;
         try {
-            $tokenObj = $jwt->parse($token);
+            $tokenObj = $jwt->getParser()->parse((string) $token);
             return static::findOne($tokenObj->getClaim('uid'));
         } catch (\Exception $e) {
             // W razie błędu parsowania JWT sprawdzamy fallback na statyczny token (z seedera)
-            return static::findOne(['access_token' => $token]);
+            return static::findOne(['access_token' => (string) $token]);
         }
     }
 
@@ -122,12 +137,22 @@ class User extends ActiveRecord implements IdentityInterface, RateLimitInterface
         return $this->auth_key === $authKey;
     }
 
+    /**
+     * @param mixed $request
+     * @param mixed $action
+     * @return array<int, int>
+     */
     public function getRateLimit($request, $action): array
     {
         // 100 zapytań na 60 sekund
         return [100, 60];
     }
 
+    /**
+     * @param mixed $request
+     * @param mixed $action
+     * @return array<int, int>
+     */
     public function loadAllowance($request, $action): array
     {
         return [$this->allowance, $this->allowance_updated_at];
@@ -135,8 +160,8 @@ class User extends ActiveRecord implements IdentityInterface, RateLimitInterface
 
     public function saveAllowance($request, $action, $allowance, $timestamp): void
     {
-        $this->allowance = $allowance;
-        $this->allowance_updated_at = $timestamp;
+        $this->allowance = (int) $allowance;
+        $this->allowance_updated_at = (int) $timestamp;
         $this->save(false); // Omijamy walidację przy szybkim zapisie
     }
 }

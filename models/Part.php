@@ -26,8 +26,6 @@ use yii\db\ActiveRecord;
  */
 class Part extends ActiveRecord
 {
-
-
     /**
      * {@inheritdoc}
      */
@@ -37,7 +35,7 @@ class Part extends ActiveRecord
     }
 
     /**
-     * @return \class-string[]
+     * @return array<int, class-string>
      */
     public function behaviors(): array
     {
@@ -97,5 +95,4 @@ class Part extends ActiveRecord
         return $this->hasMany(Vehicle::class, ['id' => 'vehicle_id'])
             ->viaTable('{{%vehicle_parts}}', ['part_id' => 'id']);
     }
-
 }

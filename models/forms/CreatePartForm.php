@@ -6,7 +6,6 @@ namespace app\models\forms;
 
 use yii\base\Model;
 use app\models\Part;
-use yii\validators\Validator;
 
 final class CreatePartForm extends Model
 {
@@ -16,7 +15,7 @@ final class CreatePartForm extends Model
     public int $stock = 0;
 
     /**
-     * @return array|\mixed[][]|Validator[]
+     * @return array<int, array<int|string, mixed>>
      */
     public function rules(): array
     {

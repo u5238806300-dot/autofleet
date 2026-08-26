@@ -93,8 +93,9 @@ class SiteController extends Controller
         }
 
         $model = new LoginForm($this->security);
+        $post = $this->request->post();
 
-        if ($model->load($this->request->post()) && $model->login()) {
+        if (is_array($post) && $model->load($post) && $model->login()) {
             return $this->goBack();
         }
 
@@ -123,12 +124,13 @@ class SiteController extends Controller
     public function actionContact(): Response|string
     {
         $model = new ContactForm();
+        $post = $this->request->post();
 
-        $contact = $model->load($this->request->post()) && $model->contact(
+        $contact = is_array($post) && $model->load($post) && $model->contact(
             $this->mailer,
-            Yii::$app->params['adminEmail'],
-            Yii::$app->params['senderEmail'],
-            Yii::$app->params['senderName'],
+            (string) Yii::$app->params['adminEmail'],
+            (string) Yii::$app->params['senderEmail'],
+            (string) Yii::$app->params['senderName'],
         );
 
         if ($contact) {

@@ -6,6 +6,8 @@ namespace app\repositories;
 
 use app\models\Part;
 use app\models\Vehicle;
+use yii\base\InvalidConfigException;
+use yii\db\Exception;
 
 final readonly class PartRepository implements PartRepositoryInterface
 {
@@ -21,6 +23,7 @@ final readonly class PartRepository implements PartRepositoryInterface
     /**
      * @param string $vin
      * @return Part[]
+     * @throws InvalidConfigException
      */
     public function findCompatiblePartsByVin(string $vin): array
     {
@@ -29,12 +32,16 @@ final readonly class PartRepository implements PartRepositoryInterface
             return [];
         }
 
-        return $vehicle->getParts()->all();
+        /** @var Part[] $parts */
+        $parts = $vehicle->getParts()->all();
+
+        return $parts;
     }
 
     /**
      * @param Part $part
      * @return bool
+     * @throws Exception
      */
     public function save(Part $part): bool
     {

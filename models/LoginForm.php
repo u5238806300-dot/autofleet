@@ -12,7 +12,7 @@ use yii\base\Security;
  * LoginForm is the model behind the login form.
  *
  * @property-read User|null $user
- *
+ */
 class LoginForm extends Model
 {
     public string $username = '';
@@ -20,13 +20,17 @@ class LoginForm extends Model
     public bool $rememberMe = true;
     private User|null $_user = null;
     private bool $_userLoaded = false;
-    public function __construct(private readonly Security $security, $config = [])
+
+    /**
+     * @param array<string, mixed> $config
+     */
+    public function __construct(private readonly Security $security, array $config = [])
     {
         parent::__construct($config);
     }
 
     /**
-     * @return array the validation rules.
+     * @return array<int, array<int|string, mixed>>
      */
     public function rules(): array
     {
@@ -45,14 +49,14 @@ class LoginForm extends Model
      * This method serves as the inline validation for password.
      *
      * @param string $attribute the attribute currently being validated
-     * @param array $params the additional name-value pairs given in the rule
+     * @param array<string, mixed>|null $params the additional name-value pairs given in the rule
      */
     public function validatePassword(string $attribute, array|null $params): void
     {
         if (!$this->hasErrors()) {
             $user = $this->getUser();
 
-            if (!$user || !$this->security->validatePassword($this->password, $user->passwordHash)) {
+            if (!$user || !$this->security->validatePassword($this->password, $user->password_hash)) {
                 $this->addError($attribute, 'Incorrect username or password.');
             }
         }
@@ -65,7 +69,10 @@ class LoginForm extends Model
     public function login(): bool
     {
         if ($this->validate()) {
-            return Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600 * 24 * 30 : 0);
+            $user = $this->getUser();
+            if ($user !== null && Yii::$app !== null && isset(Yii::$app->user)) {
+                return (bool) Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
+            }
         }
 
         return false;

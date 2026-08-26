@@ -16,29 +16,16 @@ use yii\web\NotFoundHttpException;
 
 final class PartController extends Controller
 {
+    /**
+     * @var array<string, mixed>
+     */
     public $serializer = [
         'class' => Serializer::class,
         'collectionEnvelope' => 'items', // Zwraca dane w postaci: { items: [...], _meta: {...} }
     ];
 
     /**
-     * @param $id
-     * @param $module
-     * @param PartRepositoryInterface $partRepository
-     * @param $config
-     */
-    public function __construct(
-        $id,
-        $module,
-        private readonly PartRepositoryInterface $partRepository,
-        $config = []
-    )
-    {
-        parent::__construct($id, $module, $config);
-    }
-
-    /**
-     * @return array[]
+     * @return array<string, mixed>
      */
     public function behaviors(): array
     {

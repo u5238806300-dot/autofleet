@@ -4,7 +4,9 @@ namespace app\models;
 
 use Yii;
 use yii\base\InvalidConfigException;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "vehicles".
@@ -20,10 +22,8 @@ use yii\db\ActiveQuery;
  * @property Part[] $parts
  * @property VehiclePart[] $vehicleParts
  */
-class Vehicle extends \yii\db\ActiveRecord
+class Vehicle extends ActiveRecord
 {
-
-
     /**
      * {@inheritdoc}
      */
@@ -33,12 +33,12 @@ class Vehicle extends \yii\db\ActiveRecord
     }
 
     /**
-     * @return \class-string[]
+     * @return array<int, class-string>
      */
     public function behaviors(): array
     {
         return [
-            \yii\behaviors\TimestampBehavior::class,
+            TimestampBehavior::class,
         ];
     }
 
@@ -78,7 +78,7 @@ class Vehicle extends \yii\db\ActiveRecord
      * @return ActiveQuery
      * @throws InvalidConfigException
      */
-    public function getParts(): \yii\db\ActiveQuery
+    public function getParts(): ActiveQuery
     {
         return $this->hasMany(Part::class, ['id' => 'part_id'])
             ->viaTable('{{%vehicle_parts}}', ['vehicle_id' => 'id']);
@@ -87,11 +87,10 @@ class Vehicle extends \yii\db\ActiveRecord
     /**
      * Gets query for [[VehicleParts]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
      */
     public function getVehicleParts()
     {
         return $this->hasMany(VehiclePart::class, ['vehicle_id' => 'id']);
     }
-
 }

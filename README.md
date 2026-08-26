@@ -1,62 +1,42 @@
 # AutoFleet API - MVP
 
 ## O projekcie
-Platforma B2B B2B do zarządzania flotą, zamówieniami części oraz inteligentną estymacją napraw (AI).
+Platforma B2B B2B do zarządzania flotą pojazdów, zamówieniami części oraz inteligentną estymacją napraw (AI). Projekt przygotowany jako MVP (Minimum Viable Product).
 
 ## Wymagania
 * Docker & Docker Compose
-* Make (opcjonalnie do skrótów)
+* PHP 8.2+ (uruchamiany wewnątrz kontenera)
 
-## Szybki start
-1. `docker-compose up -d --build`
-2. `docker-compose exec php composer install`
-3. `docker-compose exec php php yii migrate/up --interactive=0`
-4. `docker-compose exec php php yii seed/index`
+## Szybki start (Quick Start)
+1. Klonowanie repozytorium: `git clone ...`
+2. Zbudowanie i uruchomienie kontenerów:
+   `docker-compose up -d --build`
+3. Instalacja zależności:
+   `docker-compose exec php composer install`
+4. Przygotowanie struktury bazy danych (Migracje):
+   `docker-compose exec php php yii migrate/up --interactive=0`
+5. Zasilenie bazy danymi testowymi (Seed):
+   `docker-compose exec php php yii seed/index`
 
-## Architektura
-Projekt korzysta z Yii2 (tryb API), wymusza typowanie z **PHP 8.2** (Enums, readonly classes) i implementuje wzorzec **Repository** (SOLID) oddzielając logikę bazodanową od kontrolerów.
-
-## Bezpieczeństwo i Autoryzacja
-API wykorzystuje tokeny JWT (HttpBearerAuth). Aby wykonać żądania, należy przekazać token w nagłówku:
-`Authorization: Bearer <twój_token>`
-
-Zaimplementowany jest mechanizm **Rate Limiting** (100 requestów na minutę per użytkownik).
-
-## Logika B2B
-Klienci z rolą `B2B_PREMIUM` otrzymują automatyczny rabat 25%, natomiast `B2B_CLIENT` otrzymują 10%. Logika jest wyizolowana w klasie `DiscountService`.
-
-## Endpointy
-* `GET /api/vehicles` - Zwraca listę pojazdów (paginacja)
-* `GET /api/parts?vin=<VIN>` - Zwraca listę części (z paginacją i meta tagami), opcjonalnie filtrowaną pod kątem kompatybilności z danym pojazdem.
-
-## Przetwarzanie asynchroniczne (Kolejki)
-System korzysta z `yiisoft/yii2-queue` opartym na bazie danych MySQL/MariaDB.
-Służy on do przetwarzania ciężkich operacji, takich jak importy cenników CSV.
-
-### Zlecanie importu
-Aby wrzucić plik CSV do kolejki, uruchom:
-`docker-compose exec php php yii import/csv /var/www/html/data/import_test.csv`
-
-### Uruchamianie Workera
-Aby przetworzyć zadania czekające w kolejce (w środowisku deweloperskim), użyj:
-`docker-compose exec php php yii queue/run`
-
-*Uwaga: Na środowisku produkcyjnym worker powinien być zarządzany przez np. Supervisor (komenda `php yii queue/listen`).*
+## Architektura i Wzorce
+* **Język / Framework**: PHP 8.2 (Strict Types, Enums, Readonly classes) / Yii2 (Advanced REST API).
+* **SOLID**: Wprowadzono wzorzec **Repository** oddzielający logikę bazodanową od kontrolerów. Wstrzykiwanie zależności (Dependency Injection) skonfigurowane w konterze `config/web.php`.
+* **Autoryzacja**: Bezstanowe API zabezpieczone tokenami JWT (HttpBearerAuth).
+* **Bezpieczeństwo**: Rate Limiting (100 zapytań/minutę), strict validation.
+* **Przetwarzanie w tle**: Import plików CSV (cenniki) delegowany do asynchronicznych kolejek wykorzystujących MariaDB (`yii2-queue`).
 
 ## Integracja AI (Estymacja napraw)
-Platforma posiada inteligentny moduł diagnozowania usterek na podstawie kodów błędów OBD2 z wykorzystaniem LLM (OpenAI API).
+Platforma posiada moduł diagnozowania usterek na podstawie kodów błędów OBD2 z użyciem LLM (OpenAI API).
+* Wymagany klucz API w `.env` lub jako zmienna środowiskowa: `OPENAI_API_KEY`.
+* *Disclaimer*: Model AI może podlegać halucynacjom. Zwracane propozycje części są estymacją i powinny być zweryfikowane przez wykwalifikowanego mechanika. Logika inżynierii promptów wymusza zwracanie danych w ustrukturyzowanym formacie JSON.
 
-### Konfiguracja
-Aby moduł komunikował się z prawdziwym API, przekaż klucz środowiskowy do kontenera:
-`OPENAI_API_KEY=twój_klucz_tutaj docker-compose up -d`
-*(Jeśli klucz nie zostanie podany, system zwróci bezpieczne dane typu mock na potrzeby testów)*
+## Endpointy API
+* `GET /api/health` - Sprawdzenie środowiska
+* `GET /api/vehicles` - Zwraca listę pojazdów (paginacja)
+* `GET /api/parts?vin=<VIN>` - Zwraca listę części (z paginacją i meta tagami), opcjonalnie filtrowaną pod kątem kompatybilności.
+* `POST /api/ai/suggest-parts` - Rekomendacja części na podstawie `vin` oraz `obd2_code`.
 
-### Endpoint AI
-**POST** `/api/ai/suggest-parts`
-**Headers:** `Authorization: Bearer <token>`
-**Body (JSON):**
-```json
-{
-  "vin": "WVWZZZ1ZZEW000001",
-  "obd2_code": "P0300"
-}
+## Testy i Jakość (CI)
+* Projekt skonfigurowany pod **GitHub Actions**.
+* Analiza statyczna: `docker-compose exec php vendor/bin/phpstan analyse` (Level 8)
+* Testy jednostkowe: `docker-compose exec php vendor/bin/phpunit tests/unit`
