@@ -21,10 +21,29 @@ $config = [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
     ],
+    'modules' => [
+        'api' => [
+            'class' => \app\modules\api\Module::class,
+        ],
+    ],
     'components' => [
         'request' => [
-            // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-            'cookieValidationKey' => 'Qd_BcKKrhqLFQlRV4z2znVDt5ATdFIpb',
+            'cookieValidationKey' => 'SECRET_KEY_REPLACE_ME',
+            'parsers' => [
+                'application/json' => 'yii\web\JsonParser',
+            ]
+        ],
+        'response' => [
+            'format' => \yii\web\Response::FORMAT_JSON,
+            'charset' => 'UTF-8',
+        ],
+        'urlManager' => [
+            'enablePrettyUrl' => true,
+            'enableStrictParsing' => true,
+            'showScriptName' => false,
+            'rules' => [
+                'GET api/health' => 'api/health/index',
+            ],
         ],
         'cache' => [
             'class' => \yii\caching\FileCache::class,
