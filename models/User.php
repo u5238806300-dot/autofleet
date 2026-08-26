@@ -3,7 +3,9 @@
 namespace app\models;
 
 use Yii;
-use yii\behaviors\TimestampBehavior;use yii\db\ActiveRecord;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
+use yii\filters\RateLimitInterface;
 use yii\web\IdentityInterface;
 
 /**
@@ -18,7 +20,7 @@ use yii\web\IdentityInterface;
  * @property int $created_at
  * @property int $updated_at
  */
-class User extends ActiveRecord implements IdentityInterface
+class User extends ActiveRecord implements IdentityInterface, RateLimitInterface
 {
     /**
      * {@inheritdoc}
@@ -118,5 +120,23 @@ class User extends ActiveRecord implements IdentityInterface
     public function validateAuthKey($authKey): bool
     {
         return $this->auth_key === $authKey;
+    }
+
+    public function getRateLimit($request, $action): array
+    {
+        // 100 zapytań na 60 sekund
+        return [100, 60];
+    }
+
+    public function loadAllowance($request, $action): array
+    {
+        return [$this->allowance, $this->allowance_updated_at];
+    }
+
+    public function saveAllowance($request, $action, $allowance, $timestamp): void
+    {
+        $this->allowance = $allowance;
+        $this->allowance_updated_at = $timestamp;
+        $this->save(false); // Omijamy walidację przy szybkim zapisie
     }
 }

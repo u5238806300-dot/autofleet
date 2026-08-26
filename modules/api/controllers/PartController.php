@@ -6,6 +6,7 @@ namespace app\modules\api\controllers;
 
 use app\models\Part;
 use app\repositories\PartRepositoryInterface;
+use yii\filters\RateLimiter;
 use yii\rest\Controller;
 use yii\filters\auth\HttpBearerAuth;
 use yii\web\NotFoundHttpException;
@@ -33,9 +34,14 @@ final class PartController extends Controller
      */
     public function behaviors(): array
     {
-        return [
-            'authenticator' => ['class' => HttpBearerAuth::class],
+        $behaviors = parent::behaviors();
+        $behaviors['authenticator'] = [
+            'class' => HttpBearerAuth::class,
         ];
+        $behaviors['rateLimiter'] = [
+            'class' => RateLimiter::class,
+        ];
+        return $behaviors;
     }
 
     /**
