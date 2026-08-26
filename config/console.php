@@ -3,8 +3,11 @@
 use app\repositories\PartRepository;
 use app\repositories\PartRepositoryInterface;
 use yii\caching\FileCache;
+use yii\console\controllers\MigrateController;
 use yii\debug\Module;
 use yii\log\FileTarget;
+use yii\mutex\MysqlMutex;
+use yii\queue\db\Queue;
 
 $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
@@ -12,7 +15,7 @@ $db = require __DIR__ . '/db.php';
 $config = [
     'id' => 'basic-console',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
+    'bootstrap' => ['log', 'queue'],
     'controllerNamespace' => 'app\commands',
     'container' => [
         'definitions' => [
@@ -30,7 +33,7 @@ $config = [
     ],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
-        '@npm'   => '@vendor/npm-asset',
+        '@npm' => '@vendor/npm-asset',
         '@tests' => '@app/tests',
     ],
     'components' => [
@@ -46,15 +49,26 @@ $config = [
             ],
         ],
         'db' => $db,
-    ],
-    'params' => $params,
-    /*
-    'controllerMap' => [
-        'fixture' => [ // Fixture generation command line.
-            'class' => 'yii\faker\FixtureController',
+        'queue' => [
+            'class' => Queue::class,
+            'db' => 'db', // Komponent bazy danych
+            'tableName' => '{{%queue}}', // Tabela w bazie danych
+            'channel' => 'default', // Nazwa kolejki
+            'mutex' => MysqlMutex::class, // Zapobiega podwójnemu wykonaniu
         ],
     ],
-    */
+    'params' => $params,
+    'controllerMap' => [
+        'migrate' => [
+            'class' => MigrateController::class,
+            'migrationPath' => [
+                '@app/migrations', // Nasze lokalne migracje (te dla Users, Vehicles, itp.)
+            ],
+            'migrationNamespaces' => [
+                'yii\queue\db\migrations', // Migracje dostarczane przez moduł queue
+            ],
+        ],
+    ],
 ];
 
 

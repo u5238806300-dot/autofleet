@@ -3,10 +3,13 @@
 use app\models\User;
 use app\repositories\PartRepository;
 use app\repositories\PartRepositoryInterface;
+use sizeg\jwt\Jwt;
 use yii\caching\FileCache;
 use yii\gii\Module;
 use yii\log\FileTarget;
 use yii\mail\MailerInterface;
+use yii\mutex\MysqlMutex;
+use yii\queue\db\Queue;
 use yii\symfonymailer\Mailer;
 use yii\web\Response;
 
@@ -16,7 +19,7 @@ $db = require __DIR__ . '/db.php';
 $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
+    'bootstrap' => ['log', 'queue'],
     'container' => [
         'definitions' => [
             // W przyszłości dodamy tu kolejne repozytoria i serwisy, np.:
@@ -78,7 +81,7 @@ $config = [
             'class' => FileCache::class,
         ],
         'jwt' => [
-            'class' => \sizeg\jwt\Jwt::class,
+            'class' => Jwt::class,
             'key' => 'super-secret-b2b-key-replace-in-prod',
         ],
         'user' => [
@@ -100,6 +103,13 @@ $config = [
             ],
         ],
         'db' => $db,
+        'queue' => [
+            'class' => Queue::class,
+            'db' => 'db', // Komponent bazy danych
+            'tableName' => '{{%queue}}', // Tabela w bazie danych
+            'channel' => 'default', // Nazwa kolejki
+            'mutex' => MysqlMutex::class, // Zapobiega podwójnemu wykonaniu
+        ],
     ],
     'params' => $params,
 ];
