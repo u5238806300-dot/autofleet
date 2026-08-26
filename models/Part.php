@@ -6,6 +6,7 @@ namespace app\models;
 
 use Yii;
 use yii\base\InvalidConfigException;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 
@@ -20,8 +21,8 @@ use yii\db\ActiveRecord;
  * @property int $created_at
  * @property int $updated_at
  *
- * @property VehicleParts[] $vehicleParts
- * @property Vehicles[] $vehicles
+ * @property VehiclePart[] $vehicleParts
+ * @property Vehicle[] $vehicles
  */
 class Part extends ActiveRecord
 {
@@ -36,13 +37,23 @@ class Part extends ActiveRecord
     }
 
     /**
+     * @return \class-string[]
+     */
+    public function behaviors(): array
+    {
+        return [
+            TimestampBehavior::class,
+        ];
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
             [['stock'], 'default', 'value' => 0],
-            [['sku', 'name', 'price', 'created_at', 'updated_at'], 'required'],
+            [['sku', 'name', 'price'], 'required'],
             [['price'], 'number'],
             [['stock', 'created_at', 'updated_at'], 'integer'],
             [['sku'], 'string', 'max' => 64],
@@ -74,17 +85,7 @@ class Part extends ActiveRecord
      */
     public function getVehicleParts()
     {
-        return $this->hasMany(VehicleParts::class, ['part_id' => 'id']);
-    }
-
-    /**
-     * @return \class-string[]
-     */
-    public function behaviors(): array
-    {
-        return [
-            TimestampBehavior::class,
-        ];
+        return $this->hasMany(VehiclePart::class, ['part_id' => 'id']);
     }
 
     /**

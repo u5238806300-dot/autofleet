@@ -1,5 +1,11 @@
 <?php
 
+use app\repositories\PartRepository;
+use app\repositories\PartRepositoryInterface;
+use yii\caching\FileCache;
+use yii\debug\Module;
+use yii\log\FileTarget;
+
 $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
 
@@ -8,6 +14,20 @@ $config = [
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'controllerNamespace' => 'app\commands',
+    'container' => [
+        'definitions' => [
+            // Mapowanie interfejsu na konkretną implementację.
+            // Dzięki temu konstruktor kontrolera może wymagać PartRepositoryInterface,
+            // a Yii2 automatycznie wstrzyknie instancję PartRepository.
+            PartRepositoryInterface::class => PartRepository::class,
+
+            // W przyszłości dodamy tu kolejne repozytoria i serwisy, np.:
+            // \app\repositories\VehicleRepositoryInterface::class => \app\repositories\VehicleRepository::class,
+        ],
+        'singletons' => [
+            //
+        ],
+    ],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
@@ -15,12 +35,12 @@ $config = [
     ],
     'components' => [
         'cache' => [
-            'class' => \yii\caching\FileCache::class,
+            'class' => FileCache::class,
         ],
         'log' => [
             'targets' => [
                 [
-                    'class' => \yii\log\FileTarget::class,
+                    'class' => FileTarget::class,
                     'levels' => ['error', 'warning'],
                 ],
             ],
@@ -37,6 +57,7 @@ $config = [
     */
 ];
 
+
 if (YII_ENV_DEV) {
     // configuration adjustments for 'dev' environment
     $config['bootstrap'][] = 'gii';
@@ -47,7 +68,7 @@ if (YII_ENV_DEV) {
     // requires version `2.1.21` of yii2-debug module
     $config['bootstrap'][] = 'debug';
     $config['modules']['debug'] = [
-        'class' => \yii\debug\Module::class,
+        'class' => Module::class,
         // uncomment the following to add your IP if you are not connecting from localhost.
         //'allowedIPs' => ['127.0.0.1', '::1'],
     ];

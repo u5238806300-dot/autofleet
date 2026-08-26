@@ -3,6 +3,7 @@
 namespace app\models;
 
 use Yii;
+use yii\behaviors\TimestampBehavior;use yii\db\ActiveRecord;
 
 /**
  * This is the model class for table "users".
@@ -16,7 +17,7 @@ use Yii;
  * @property int $created_at
  * @property int $updated_at
  */
-class User extends \yii\db\ActiveRecord
+class User extends ActiveRecord
 {
 
 
@@ -25,7 +26,17 @@ class User extends \yii\db\ActiveRecord
      */
     public static function tableName()
     {
-        return 'users';
+        return '{{%users}}';
+    }
+
+    /**
+     * @return class-string[]
+     */
+    public function behaviors(): array
+    {
+        return [
+            TimestampBehavior::class,
+        ];
     }
 
     /**
@@ -36,7 +47,7 @@ class User extends \yii\db\ActiveRecord
         return [
             [['access_token'], 'default', 'value' => null],
             [['role'], 'default', 'value' => 'b2b_client'],
-            [['username', 'auth_key', 'password_hash', 'created_at', 'updated_at'], 'required'],
+            [['username', 'auth_key', 'password_hash'], 'required'],
             [['created_at', 'updated_at'], 'integer'],
             [['username', 'password_hash', 'access_token'], 'string', 'max' => 255],
             [['auth_key', 'role'], 'string', 'max' => 32],
@@ -61,5 +72,4 @@ class User extends \yii\db\ActiveRecord
             'updated_at' => 'Updated At',
         ];
     }
-
 }

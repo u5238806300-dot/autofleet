@@ -10,8 +10,8 @@ use Yii;
  * @property int $vehicle_id
  * @property int $part_id
  *
- * @property Parts $part
- * @property Vehicles $vehicle
+ * @property Part $part
+ * @property Vehicle $vehicle
  */
 class VehiclePart extends \yii\db\ActiveRecord
 {
@@ -34,8 +34,8 @@ class VehiclePart extends \yii\db\ActiveRecord
             [['vehicle_id', 'part_id'], 'required'],
             [['vehicle_id', 'part_id'], 'integer'],
             [['vehicle_id', 'part_id'], 'unique', 'targetAttribute' => ['vehicle_id', 'part_id']],
-            [['part_id'], 'exist', 'skipOnError' => true, 'targetClass' => Parts::class, 'targetAttribute' => ['part_id' => 'id']],
-            [['vehicle_id'], 'exist', 'skipOnError' => true, 'targetClass' => Vehicles::class, 'targetAttribute' => ['vehicle_id' => 'id']],
+            [['part_id'], 'exist', 'skipOnError' => true, 'targetClass' => Part::class, 'targetAttribute' => ['part_id' => 'id']],
+            [['vehicle_id'], 'exist', 'skipOnError' => true, 'targetClass' => Vehicle::class, 'targetAttribute' => ['vehicle_id' => 'id']],
         ];
     }
 
@@ -57,7 +57,7 @@ class VehiclePart extends \yii\db\ActiveRecord
      */
     public function getPart()
     {
-        return $this->hasOne(Parts::class, ['id' => 'part_id']);
+        return $this->hasOne(Part::class, ['id' => 'part_id']);
     }
 
     /**
@@ -67,7 +67,7 @@ class VehiclePart extends \yii\db\ActiveRecord
      */
     public function getVehicle()
     {
-        return $this->hasOne(Vehicles::class, ['id' => 'vehicle_id']);
+        return $this->hasOne(Vehicle::class, ['id' => 'vehicle_id']);
     }
 
 }

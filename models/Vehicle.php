@@ -3,6 +3,8 @@
 namespace app\models;
 
 use Yii;
+use yii\base\InvalidConfigException;
+use yii\db\ActiveQuery;
 
 /**
  * This is the model class for table "vehicles".
@@ -15,8 +17,8 @@ use Yii;
  * @property int $created_at
  * @property int $updated_at
  *
- * @property Parts[] $parts
- * @property VehicleParts[] $vehicleParts
+ * @property Part[] $parts
+ * @property VehiclePart[] $vehicleParts
  */
 class Vehicle extends \yii\db\ActiveRecord
 {
@@ -31,12 +33,22 @@ class Vehicle extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return \class-string[]
+     */
+    public function behaviors(): array
+    {
+        return [
+            \yii\behaviors\TimestampBehavior::class,
+        ];
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['vin', 'make', 'model', 'year', 'created_at', 'updated_at'], 'required'],
+            [['vin', 'make', 'model', 'year'], 'required'],
             [['year', 'created_at', 'updated_at'], 'integer'],
             [['vin'], 'string', 'max' => 17],
             [['make', 'model'], 'string', 'max' => 64],
@@ -63,11 +75,13 @@ class Vehicle extends \yii\db\ActiveRecord
     /**
      * Gets query for [[Parts]].
      *
-     * @return \yii\db\ActiveQuery
+     * @return ActiveQuery
+     * @throws InvalidConfigException
      */
-    public function getParts()
+    public function getParts(): \yii\db\ActiveQuery
     {
-        return $this->hasMany(Parts::class, ['id' => 'part_id'])->viaTable('vehicle_parts', ['vehicle_id' => 'id']);
+        return $this->hasMany(Part::class, ['id' => 'part_id'])
+            ->viaTable('{{%vehicle_parts}}', ['vehicle_id' => 'id']);
     }
 
     /**
@@ -77,7 +91,7 @@ class Vehicle extends \yii\db\ActiveRecord
      */
     public function getVehicleParts()
     {
-        return $this->hasMany(VehicleParts::class, ['vehicle_id' => 'id']);
+        return $this->hasMany(VehiclePart::class, ['vehicle_id' => 'id']);
     }
 
 }
