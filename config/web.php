@@ -67,9 +67,14 @@ $config = [
         'cache' => [
             'class' => FileCache::class,
         ],
+        'jwt' => [
+            'class' => \sizeg\jwt\Jwt::class,
+            'key' => 'super-secret-b2b-key-replace-in-prod',
+        ],
         'user' => [
-            'identityClass' => User::class,
-            'enableAutoLogin' => true,
+            'identityClass' => 'app\models\User',
+            'enableSession' => false, // Ważne dla REST API (bezciasteczkowe)
+            'loginUrl' => null,
         ],
         'errorHandler' => [
             'errorAction' => 'site/error',

@@ -4,6 +4,7 @@ namespace app\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;use yii\db\ActiveRecord;
+use yii\web\IdentityInterface;
 
 /**
  * This is the model class for table "users".
@@ -17,10 +18,8 @@ use yii\behaviors\TimestampBehavior;use yii\db\ActiveRecord;
  * @property int $created_at
  * @property int $updated_at
  */
-class User extends ActiveRecord
+class User extends ActiveRecord implements IdentityInterface
 {
-
-
     /**
      * {@inheritdoc}
      */
@@ -71,5 +70,53 @@ class User extends ActiveRecord
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];
+    }
+
+    /**
+     * @param $id
+     * @return IdentityInterface|null
+     */
+    public static function findIdentity($id): ?IdentityInterface
+    {
+        return static::findOne($id);
+    }
+
+    /**
+     * @param $token
+     * @param null $type
+     * @return IdentityInterface|null
+     */
+    public static function findIdentityByAccessToken($token, $type = null): ?IdentityInterface
+    {
+        /** @var \sizeg\jwt\Jwt $jwt */
+        $jwt = \Yii::$app->jwt;
+        try {
+            $tokenObj = $jwt->parse($token);
+            return static::findOne($tokenObj->getClaim('uid'));
+        } catch (\Exception $e) {
+            // W razie błędu parsowania JWT sprawdzamy fallback na statyczny token (z seedera)
+            return static::findOne(['access_token' => $token]);
+        }
+    }
+
+    /**
+     * @return int
+     */
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAuthKey(): string
+    {
+        return $this->auth_key;
+    }
+
+    public function validateAuthKey($authKey): bool
+    {
+        return $this->auth_key === $authKey;
     }
 }
