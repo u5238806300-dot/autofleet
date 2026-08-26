@@ -19,15 +19,14 @@ $config = [
     'bootstrap' => ['log'],
     'container' => [
         'definitions' => [
-            // Mapowanie interfejsu na konkretną implementację.
-            // Dzięki temu konstruktor kontrolera może wymagać PartRepositoryInterface,
-            // a Yii2 automatycznie wstrzyknie instancję PartRepository.
-            PartRepositoryInterface::class => PartRepository::class,
-
             // W przyszłości dodamy tu kolejne repozytoria i serwisy, np.:
             // \app\repositories\VehicleRepositoryInterface::class => \app\repositories\VehicleRepository::class,
         ],
         'singletons' => [
+            // Mapowanie interfejsu na konkretną implementację.
+            // Dzięki temu konstruktor kontrolera może wymagać PartRepositoryInterface,
+            // a Yii2 automatycznie wstrzyknie instancję PartRepository.
+            PartRepositoryInterface::class => PartRepository::class,
             MailerInterface::class => [
                 'class' => Mailer::class,
                 // send all mails to a file by default.
