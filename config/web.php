@@ -38,7 +38,7 @@ $config = [
     ],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
-        '@npm'   => '@vendor/npm-asset',
+        '@npm' => '@vendor/npm-asset',
     ],
     'modules' => [
         'api' => [
@@ -61,7 +61,18 @@ $config = [
             'enableStrictParsing' => true,
             'showScriptName' => false,
             'rules' => [
+                // Ręczny routing dla health-checka
                 'GET api/health' => 'api/health/index',
+
+                // Automatyczny routing RESTful dla kontrolerów
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => [
+                        'api/vehicle',
+                        'api/part'
+                    ],
+                    // Yii2 domyślnie dodaje liczbę mnogą do URL (np. api/vehicles),
+                ],
             ],
         ],
         'cache' => [
@@ -90,14 +101,6 @@ $config = [
             ],
         ],
         'db' => $db,
-        /*
-        'urlManager' => [
-            'enablePrettyUrl' => true,
-            'showScriptName' => false,
-            'rules' => [
-            ],
-        ],
-        */
     ],
     'params' => $params,
 ];
