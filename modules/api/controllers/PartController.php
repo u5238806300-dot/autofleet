@@ -5,14 +5,22 @@ declare(strict_types=1);
 namespace app\modules\api\controllers;
 
 use app\models\Part;
+use app\models\Vehicle;
 use app\repositories\PartRepositoryInterface;
+use yii\data\ActiveDataProvider;
 use yii\filters\RateLimiter;
 use yii\rest\Controller;
 use yii\filters\auth\HttpBearerAuth;
+use yii\rest\Serializer;
 use yii\web\NotFoundHttpException;
 
 final class PartController extends Controller
 {
+    public $serializer = [
+        'class' => Serializer::class,
+        'collectionEnvelope' => 'items', // Zwraca dane w postaci: { items: [...], _meta: {...} }
+    ];
+
     /**
      * @param $id
      * @param $module
@@ -46,15 +54,26 @@ final class PartController extends Controller
 
     /**
      * @param string|null $vin
-     * @return array
+     * @return ActiveDataProvider
      */
-    public function actionIndex(?string $vin = null): array
+    public function actionIndex(?string $vin = null): ActiveDataProvider
     {
+        $query = Part::find();
+
         if ($vin) {
-            return $this->partRepository->findCompatiblePartsByVin($vin);
+            $vehicle = Vehicle::findOne(['vin' => $vin]);
+            if ($vehicle) {
+                $query->innerJoinWith('vehicles v')->where(['v.vin' => $vin]);
+            } else {
+                $query->where('0=1'); // Zwraca pusto dla błędnego VIN
+            }
         }
 
-        // Zwracamy wszystko jeśli nie podano VIN (w późniejszym commicie dodamy DataProvider)
-        return Part::find()->all();
+        return new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageSize' => 20, // Paginacja wymuszona na 20 elementów
+            ],
+        ]);
     }
 }
